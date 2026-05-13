@@ -1,6 +1,7 @@
 package de.di.similarity_measures;
 
 import lombok.AllArgsConstructor;
+import java.util.Objects;
 
 import java.util.Arrays;
 
@@ -39,7 +40,38 @@ public class Levenshtein implements SimilarityMeasure {
         // algorithm. Depending on whether the inner flag withDamerau is set, the Damerau extension rule should be    //
         // used during calculation or not. Hint: Implement the Levenshtein algorithm here first, then copy the code   //
         // to the String tuple function and adjust it a bit to work on the arrays - the algorithm is the same.        //
+        if (string1 == null || string2 == null)
+            return 0;
 
+        for (int j = 1; j <= string2.length(); j++) {
+            lowerLine[0] = j;
+
+            for (int i = 1; i <= string1.length(); i++) {
+                int cost = string1.charAt(i - 1) == string2.charAt(j - 1) ? 0 : 1;
+
+                lowerLine[i] = min(
+                        upperLine[i] + 1,        // deletion
+                        lowerLine[i - 1] + 1,    // insertion
+                        upperLine[i - 1] + cost  // replacement
+                );
+
+                if (this.withDamerau && i > 1 && j > 1
+                        && string1.charAt(i - 1) == string2.charAt(j - 2)
+                        && string1.charAt(i - 2) == string2.charAt(j - 1)) {
+                    lowerLine[i] = Math.min(lowerLine[i], upperupperLine[i - 2] + 1);
+                }
+            }
+
+            int[] temp = upperupperLine;
+            upperupperLine = upperLine;
+            upperLine = lowerLine;
+            lowerLine = temp;
+        }
+
+        int distance = upperLine[string1.length()];
+        int maxLength = Math.max(string1.length(), string2.length());
+
+        levenshteinSimilarity = maxLength == 0 ? 1 : 1 - ((double) distance / maxLength);
 
 
         //                                                                                                            //
@@ -77,7 +109,38 @@ public class Levenshtein implements SimilarityMeasure {
         // to this function and adjust it a bit to work on the arrays - the algorithm is the same.                    //
 
 
+        if (strings1 == null || strings2 == null)
+            return 0;
 
+        for (int j = 1; j <= strings2.length; j++) {
+            lowerLine[0] = j;
+
+            for (int i = 1; i <= strings1.length; i++) {
+                int cost = Objects.equals(strings1[i - 1], strings2[j - 1]) ? 0 : 1;
+
+                lowerLine[i] = min(
+                        upperLine[i] + 1,        // deletion
+                        lowerLine[i - 1] + 1,    // insertion
+                        upperLine[i - 1] + cost  // replacement
+                );
+
+                if (this.withDamerau && i > 1 && j > 1
+                        && Objects.equals(strings1[i - 1], strings2[j - 2])
+                        && Objects.equals(strings1[i - 2], strings2[j - 1])) {
+                    lowerLine[i] = Math.min(lowerLine[i], upperupperLine[i - 2] + 1);
+                }
+            }
+
+            int[] temp = upperupperLine;
+            upperupperLine = upperLine;
+            upperLine = lowerLine;
+            lowerLine = temp;
+        }
+
+        int distance = upperLine[strings1.length];
+        int maxLength = Math.max(strings1.length, strings2.length);
+
+        levenshteinSimilarity = maxLength == 0 ? 1 : 1 - ((double) distance / maxLength);
         //                                                                                                            //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
