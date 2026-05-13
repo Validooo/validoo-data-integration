@@ -58,6 +58,49 @@ public class Jaccard implements SimilarityMeasure {
         //                                                                                                            //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+        if (strings1 == null) strings1 = new String[0];
+        if (strings2 == null) strings2 = new String[0];
+
+        if (this.bagSemantics) {
+            Map<String, Long> counts1 = Arrays.stream(strings1)
+                                              .collect(Collectors.groupingBy(s -> s, Collectors.counting()));
+
+            Map<String, Long> counts2 = Arrays.stream(strings2)
+                                              .collect(Collectors.groupingBy(s -> s, Collectors.counting()));
+
+            Set<String> allTokens = new HashSet<>();
+            allTokens.addAll(counts1.keySet());
+            allTokens.addAll(counts2.keySet());
+
+            long intersection = 0;
+            long union = 0;
+
+            for (String token : allTokens) {
+                long count1 = counts1.getOrDefault(token, 0L);
+                long count2 = counts2.getOrDefault(token, 0L);
+
+                intersection += Math.min(count1, count2);
+                union += count1 + count2;
+            }
+
+            jaccardSimilarity = union == 0 ? 0 : (double) intersection / union;
+        } else {
+            Set<String> set1 = new HashSet<>(Arrays.asList(strings1));
+            Set<String> set2 = new HashSet<>(Arrays.asList(strings2));
+
+            Set<String> intersection = new HashSet<>(set1);
+            intersection.retainAll(set2);
+
+            Set<String> union = new HashSet<>(set1);
+            union.addAll(set2);
+
+            jaccardSimilarity = union.isEmpty() ? 0 : (double) intersection.size() / union.size();
+        }
+
+
+
+
         return jaccardSimilarity;
     }
 }
