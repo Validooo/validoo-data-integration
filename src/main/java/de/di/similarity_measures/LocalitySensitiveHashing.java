@@ -55,6 +55,8 @@ public class LocalitySensitiveHashing implements SimilarityMeasure {
         String[] signature1 = new String[k];
         String[] signature2 = new String[k];
 
+
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //                                      DATA INTEGRATION ASSIGNMENT                                           //
         // Calculate the two signatures by using the internal MinHash functions. Then, use the signatures to          //
@@ -64,7 +66,18 @@ public class LocalitySensitiveHashing implements SimilarityMeasure {
 
         //                                                                                                            //
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        for (int i = 0; i < k; i++) {
+            MinHash minHash = this.minHashFunctions.get(i);
 
+            signature1[i] = minHash.hash(strings1);
+            signature2[i] = minHash.hash(strings2);
+
+            if (signature1[i].equals(signature2[i])) {
+                lshJaccard++;
+            }
+        }
+
+        lshJaccard = lshJaccard / k;
         return lshJaccard;
     }
 }
