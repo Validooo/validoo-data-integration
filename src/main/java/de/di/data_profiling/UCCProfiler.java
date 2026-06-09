@@ -24,24 +24,52 @@ public class UCCProfiler {
         for (int attribute = 0; attribute < numAttributes; attribute++) {
             AttributeList attributes = new AttributeList(attribute);
             PositionListIndex pli = new PositionListIndex(attributes, relation.getColumns()[attribute]);
+
             if (pli.isUnique())
                 uniques.add(new UCC(relation, attributes));
             else
                 currentNonUniques.add(pli);
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //                                      DATA INTEGRATION ASSIGNMENT                                           //
-        // Discover all unique column combinations of size n>1 by traversing the lattice level-wise. Make sure to     //
-        // generate only minimal candidates while moving upwards and to prune non-minimal ones. Hint: The class       //
-        // AttributeList offers some helpful functions to test for sub- and superset relationships. Use PLI           //
-        // intersection to validate the candidates in every lattice level. Advances techniques, such as random walks, //
-        // hybrid search strategies, or hitting set reasoning can be used, but are optional to pass the assignment.   //
+        // Discover UCCs of size > 1 level-wise
+        while (!currentNonUniques.isEmpty()) {
+            List<PositionListIndex> nextNonUniques = new ArrayList<>();
 
+            for (int i = 0; i < currentNonUniques.size(); i++) {
+                for (int j = i + 1; j < currentNonUniques.size(); j++) {
+                    PositionListIndex pli1 = currentNonUniques.get(i);
+                    PositionListIndex pli2 = currentNonUniques.get(j);
 
+                    AttributeList attributes1 = pli1.getAttributes();
+                    AttributeList attributes2 = pli2.getAttributes();
 
-        //                                                                                                            //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    if (!attributes1.samePrefixAs(attributes2))
+                        continue;
+
+                    AttributeList candidateAttributes = attributes1.union(attributes2);
+
+                    boolean isMinimal = true;
+                    for (UCC unique : uniques) {
+                        if (unique.getAttributeList().subsetOf(candidateAttributes)) {
+                            isMinimal = false;
+                            break;
+                        }
+                    }
+
+                    if (!isMinimal)
+                        continue;
+
+                    PositionListIndex candidatePli = pli1.intersect(pli2);
+
+                    if (candidatePli.isUnique())
+                        uniques.add(new UCC(relation, candidateAttributes));
+                    else
+                        nextNonUniques.add(candidatePli);
+                }
+            }
+
+            currentNonUniques = nextNonUniques;
+        }
 
         return uniques;
     }

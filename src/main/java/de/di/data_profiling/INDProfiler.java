@@ -16,20 +16,44 @@ public class INDProfiler {
     public List<IND> profile(List<Relation> relations, boolean discoverNary) {
         List<IND> inclusionDependencies = new ArrayList<>();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //                                      DATA INTEGRATION ASSIGNMENT                                           //
-        // Discover all inclusion dependencies and return them in inclusion dependencies list. The boolean flag       //
-        // discoverNary indicates, whether only unary or both unary and n-ary INDs should be discovered. To solve     //
-        // this assignment, only unary INDs need to be discovered. Discovering also n-ary INDs is optional.           //
-
-
-
-        //                                                                                                            //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         if (discoverNary)
-            // Here, the lattice search would start if n-ary IND discovery would be supported.
             throw new RuntimeException("Sorry, n-ary IND discovery is not supported by this solution.");
+
+        // Convert every relation's columns into sets
+        Map<Relation, List<Set<String>>> relationColumnSets = new HashMap<>();
+
+        for (Relation relation : relations) {
+            relationColumnSets.put(relation, this.toColumnSets(relation.getColumns()));
+        }
+
+        // Compare every column with every other column
+        for (Relation lhsRelation : relations) {
+            List<Set<String>> lhsColumnSets = relationColumnSets.get(lhsRelation);
+
+            for (int lhsAttribute = 0; lhsAttribute < lhsColumnSets.size(); lhsAttribute++) {
+                Set<String> lhsValues = lhsColumnSets.get(lhsAttribute);
+
+                for (Relation rhsRelation : relations) {
+                    List<Set<String>> rhsColumnSets = relationColumnSets.get(rhsRelation);
+
+                    for (int rhsAttribute = 0; rhsAttribute < rhsColumnSets.size(); rhsAttribute++) {
+
+                        // Skip trivial IND: same relation and same attribute
+                        if (lhsRelation.equals(rhsRelation) && lhsAttribute == rhsAttribute)
+                            continue;
+
+                        Set<String> rhsValues = rhsColumnSets.get(rhsAttribute);
+
+                        // Check lhs ⊆ rhs
+                        if (rhsValues.containsAll(lhsValues)) {
+                            inclusionDependencies.add(
+                                    new IND(lhsRelation, lhsAttribute, rhsRelation, rhsAttribute)
+                            );
+                        }
+                    }
+                }
+            }
+        }
 
         return inclusionDependencies;
     }
