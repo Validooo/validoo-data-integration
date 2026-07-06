@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,7 +81,12 @@ public class FirstLineSchemaMatcherTest {
 
                 // Calculate the matching
                 FirstLineSchemaMatcher matcher = new FirstLineSchemaMatcher();
+                System.out.println("====================================");
+                System.out.println("Source: " + sourceRelation.getName());
+                System.out.println(Arrays.toString(sourceRelation.getAttributes()));
 
+                System.out.println("Target: " + targetRelation.getName());
+                System.out.println(Arrays.toString(targetRelation.getAttributes()));
                 SimilarityMatrix simMatrix = matcher.match(sourceRelation, targetRelation);
 
                 // Translate ground truth data into a correlation matrix
@@ -92,6 +98,15 @@ public class FirstLineSchemaMatcherTest {
 
                 double rocScore = rocAlgorithm.run(corrMatrix.getMatrix(), simMatrix.getMatrix());
                 double prScore = prAlgorithm.run(corrMatrix.getMatrix(), simMatrix.getMatrix());
+
+                System.out.println("Similarity Matrix:");
+                System.out.println(simMatrix);
+
+                System.out.println("Ground Truth Matrix:");
+                System.out.println(corrMatrix);
+
+                System.out.println("ROC: " + rocScore + " expected: " + expectedROC[relationMatch]);
+                System.out.println("PR: " + prScore + " expected: " + expectedPR[relationMatch]);
 
                 assertTrue(expectedROC[relationMatch] <= rocScore);
                 assertTrue(expectedPR[relationMatch] <= prScore);

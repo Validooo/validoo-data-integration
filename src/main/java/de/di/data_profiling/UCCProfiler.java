@@ -31,7 +31,18 @@ public class UCCProfiler {
                 currentNonUniques.add(pli);
         }
 
-        // Discover UCCs of size > 1 level-wise
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //                                      DATA INTEGRATION ASSIGNMENT                                           //
+        // Discover all unique column combinations of size n>1 by traversing the lattice level-wise. Make sure to     //
+        // generate only minimal candidates while moving upwards and to prune non-minimal ones. Hint: The class       //
+        // AttributeList offers some helpful functions to test for sub- and superset relationships. Use PLI           //
+        // intersection to validate the candidates in every lattice level. Advances techniques, such as random walks, //
+        // hybrid search strategies, or hitting set reasoning can be used, but are optional to pass the assignment.   //
+
+
+
+        //                                                                                                            //
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         while (!currentNonUniques.isEmpty()) {
             List<PositionListIndex> nextNonUniques = new ArrayList<>();
 

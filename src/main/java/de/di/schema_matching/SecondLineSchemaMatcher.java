@@ -18,17 +18,48 @@ public class SecondLineSchemaMatcher {
 
         int[][] corrMatrix = null;
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //                                      DATA INTEGRATION ASSIGNMENT                                           //
-        // Translate the similarity matrix into a binary correlation matrix by implementing either the StableMarriage //
-        // algorithm or the Hungarian method.                                                                         //
+        int sourceCount = simMatrix.length;
+        int targetCount = sourceCount == 0 ? 0 : simMatrix[0].length;
 
+        int[] sourceAssignments = new int[sourceCount];
+        Arrays.fill(sourceAssignments, -1);
 
+        boolean[] targetAssigned = new boolean[targetCount];
 
-        //                                                                                                            //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        for (int k = 0; k < Math.min(sourceCount, targetCount); k++) {
+            int bestSource = -1;
+            int bestTarget = -1;
+            double bestSimilarity = -1.0;
 
-        return new CorrespondenceMatrix(corrMatrix, similarityMatrix.getSourceRelation(), similarityMatrix.getTargetRelation());
+            for (int i = 0; i < sourceCount; i++) {
+                if (sourceAssignments[i] != -1)
+                    continue;
+
+                for (int j = 0; j < targetCount; j++) {
+                    if (targetAssigned[j])
+                        continue;
+
+                    if (simMatrix[i][j] > bestSimilarity) {
+                        bestSimilarity = simMatrix[i][j];
+                        bestSource = i;
+                        bestTarget = j;
+                    }
+                }
+            }
+
+            if (bestSource >= 0 && bestTarget >= 0) {
+                sourceAssignments[bestSource] = bestTarget;
+                targetAssigned[bestTarget] = true;
+            }
+        }
+
+        corrMatrix = assignmentArray2correlationMatrix(sourceAssignments, simMatrix);
+
+        return new CorrespondenceMatrix(
+                corrMatrix,
+                similarityMatrix.getSourceRelation(),
+                similarityMatrix.getTargetRelation()
+        );
     }
 
     /**
